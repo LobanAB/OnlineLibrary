@@ -41,7 +41,7 @@ def download_image(image, folder='images/'):
         str: Путь до файла, куда сохранён текст.
     """
     url = f'https://tululu.org{image}'
-    print(url)
+    #print(url)
     response = requests.get(url)
     response.raise_for_status()
     image_name = image.split('/')[-1]
@@ -55,14 +55,20 @@ def get_book_header(book_id):
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
     print('Заголовок:', soup.find('h1').text.split('::')[0].strip())
-    print(soup.find(class_='bookimage').find('img')['src'])
+    #print(soup.find(class_='bookimage').find('img')['src'])
     #print(urllib.parse.urljoin('https://tululu.org', soup.find(class_='bookimage').find('img')['src']))
     #image = urllib.parse.urljoin('https://tululu.org', soup.find(class_='bookimage').find('img')['src'])
     # print(soup.find_all(class_='d_book')[2].find('td').text)
     # print('Заголовок:', soup.find('h1').text.split('::')[0].strip())
     # print('Автор:', soup.find('h1').text.split('::')[1].strip())
+    comments = []
+    for comment in soup.find(id='content').find_all(class_='black'):
+        comments.append(comment.get_text())
+        print(comment.get_text())
+    print()
     book_header = dict(header=soup.find('h1').text.split('::')[0].strip(),
-                       image=soup.find(class_='bookimage').find('img')['src'])
+                       image=soup.find(class_='bookimage').find('img')['src'],
+                       comments=comments)
     return book_header
 
 
@@ -74,7 +80,7 @@ def check_for_redirect(response):
 def main():
     Path("books").mkdir(parents=True, exist_ok=True)
     Path("images").mkdir(parents=True, exist_ok=True)
-    for book_id in range(1, 11):
+    for book_id in range(6, 10):
         try:
             get_book(book_id)
         except requests.exceptions.HTTPError:
