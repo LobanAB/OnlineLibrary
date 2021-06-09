@@ -27,8 +27,8 @@ def download_txt(book_id, folder='books/'):
     check_for_redirect(response)
     book_header = get_book_header(book_id)
     filename = os.path.join(folder, (str(book_id) + '.' + sanitize_filename(book_header['header']) + '.txt'))
-    with open(filename, 'wb') as file:
-        file.write(response.content)
+    #with open(filename, 'wb') as file:
+    #   file.write(response.content)
     download_image(book_header['image'])
 
 
@@ -61,10 +61,11 @@ def get_book_header(book_id):
     # print(soup.find_all(class_='d_book')[2].find('td').text)
     # print('Заголовок:', soup.find('h1').text.split('::')[0].strip())
     # print('Автор:', soup.find('h1').text.split('::')[1].strip())
+    print(soup.find(id='content').find('span', class_='d_book').text.split(':')[1].strip().strip('.').split(', '))
     comments = []
     for comment in soup.find(id='content').find_all(class_='black'):
         comments.append(comment.get_text())
-        print(comment.get_text())
+        #print(comment.get_text())
     print()
     book_header = dict(header=soup.find('h1').text.split('::')[0].strip(),
                        image=soup.find(class_='bookimage').find('img')['src'],
@@ -80,7 +81,7 @@ def check_for_redirect(response):
 def main():
     Path("books").mkdir(parents=True, exist_ok=True)
     Path("images").mkdir(parents=True, exist_ok=True)
-    for book_id in range(6, 10):
+    for book_id in range(1, 11):
         try:
             get_book(book_id)
         except requests.exceptions.HTTPError:
