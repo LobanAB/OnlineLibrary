@@ -65,12 +65,12 @@ def check_for_redirect(response: requests.models.Response) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description='Программа скачивает книги '
                                                  'с библиотеки tululu.org ')
-    parser.add_argument('start_id', help='id книги с которой начать закачку ')
-    parser.add_argument('end_id', help='id книги конечный ')
+    parser.add_argument('start_id', help='id книги с которой начать закачку ', type=int)
+    parser.add_argument('end_id', help='id книги конечный ', type=int)
     args = parser.parse_args()
     Path("books").mkdir(parents=True, exist_ok=True)
     Path("images").mkdir(parents=True, exist_ok=True)
-    for book_id in range(int(args.start_id), (int(args.end_id) + 1)):
+    for book_id in range(args.start_id, (args.end_id + 1)):
         try:
             download_txt(book_id)
         except requests.exceptions.HTTPError:
