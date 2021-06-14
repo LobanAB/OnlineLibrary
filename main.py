@@ -4,23 +4,25 @@ from bs4 import BeautifulSoup
 import os
 from pathvalidate import sanitize_filename
 import argparse
+import sys
 
 
-def download_txt(book_id: int, folder='books/') -> None:
+def download_txt(book_id: int, folder='books/') -> dict:
     """Функция для скачивания текстовых файлов.
     Args:
         book_id (str): id книги, которую хочется скачать.
         folder (str): Папка, куда сохранять.
     """
-    url = f"https://tululu.org/txt.php?id={book_id}"
-    response = requests.get(url)
+    url = f"https://tululu.org/txt.php"
+    payload = {"id": book_id}
+    response = requests.get(url, params=payload)
     response.raise_for_status()
     check_for_redirect(response)
-    book_page = parse_book_page(book_id)
-    filename = os.path.join(folder, (str(book_id) + '.' + sanitize_filename(book_page['header']) + '.txt'))
-    with open(filename, 'wb') as file:
-        file.write(response.content)
-    download_image(book_page['image'])
+    book_description = parse_book_page(book_id)
+    filename = os.path.join(folder, f"{book_id}.{sanitize_filename(book_description['header'])}.txt")
+    with open(filename, 'w') as file:
+        file.write(response.text)
+    return book_description
 
 
 def download_image(image: str, folder='images/') -> None:
@@ -43,18 +45,16 @@ def parse_book_page(book_id: int) -> dict:
     response = requests.get(url)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
-    print('Заголовок:', soup.find('h1').text.split('::')[0].strip())
-    comments = []
-    for comment in soup.find(id='content').find_all(class_='black'):
-        comments.append(comment.get_text())
-    print()
-    book_header = dict(header=soup.find('h1').text.split('::')[0].strip(),
-                       image=soup.find(class_='bookimage').find('img')['src'],
-                       comments=comments,
-                       author=soup.find('h1').text.split('::')[1].strip(),
-                       genre=soup.find(id='content').find('span', class_='d_book').text.split(':')[1]
-                       .strip().strip('.').split(', '))
-    return book_header
+    comments = [comment.get_text() for comment in soup.find(id='content').find_all(class_='black')]
+    book_description = {
+        'header': soup.find('h1').text.split('::')[0].strip(),
+        'image': soup.find(class_='bookimage').find('img')['src'],
+        'comments': comments,
+        'author': soup.find('h1').text.split('::')[1].strip(),
+        'genre': soup.find(id='content').find('span', class_='d_book')
+            .text.split(':')[1].strip().strip('.').split(', ')
+    }
+    return book_description
 
 
 def check_for_redirect(response: requests.models.Response) -> None:
@@ -63,18 +63,21 @@ def check_for_redirect(response: requests.models.Response) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description='Программа скачивает книги '
-                                                 'с библиотеки tululu.org ')
-    parser.add_argument('start_id', help='id книги с которой начать закачку ', type=int)
-    parser.add_argument('end_id', help='id книги конечный ', type=int)
+    parser = argparse.ArgumentParser(
+        description='Программа скачивает книги с библиотеки tululu.org ')
+    parser.add_argument(
+        'start_id', help='id книги с которой начать закачку ', type=int)
+    parser.add_argument(
+        'end_id', help='id книги конечный ', type=int)
     args = parser.parse_args()
     Path("books").mkdir(parents=True, exist_ok=True)
     Path("images").mkdir(parents=True, exist_ok=True)
     for book_id in range(args.start_id, (args.end_id + 1)):
         try:
-            download_txt(book_id)
+            book_description = download_txt(book_id)
+            download_image(book_description['image'])
         except requests.exceptions.HTTPError:
-            pass
+            print(f"Книга - id_{book_id} отсутствует на сервере", file=sys.stderr)
 
 
 if __name__ == '__main__':
