@@ -46,13 +46,13 @@ def parse_book_page(book_id: int) -> dict:
     response = requests.get(url)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
-    comments = [comment.get_text() for comment in soup.find(id='content').find_all(class_='black')]
+    comments = [comment.get_text() for comment in soup.select('#content .black')]
     book_description = {
-        'header': soup.find('h1').text.split('::')[0].strip(),
-        'image': soup.find(class_='bookimage').find('img')['src'],
+        'header': soup.select_one('h1').text.split('::')[0].strip(),
+        'image': soup.select_one('.bookimage img')['src'],
         'comments': comments,
-        'author': soup.find('h1').text.split('::')[1].strip(),
-        'genre': soup.find(id='content').find('span', class_='d_book')
+        'author': soup.select_one('h1').text.split('::')[1].strip(),
+        'genre': soup.select_one('#content span.d_book')
             .text.split(':')[1].strip().strip('.').split(', ')
     }
     return book_description
@@ -68,7 +68,8 @@ def parse_category_page(category_id=55, page_to_parse=1):
     response = requests.get(url)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
-    books_id_list = [book.a.extract().get('href')[2:-1] for book in soup.find(id='content').find_all(class_='bookimage')]
+    books_id_list = [book.a.extract().get('href')[2:-1] for book in
+                     soup.select('#content .bookimage')]
     return books_id_list
 
 
@@ -91,7 +92,7 @@ def main() -> None:
     Path("images").mkdir(parents=True, exist_ok=True)
     category_id = 55
     pages_to_parse = 1
-    books_id_lists = [parse_category_page(category_id, page) for page in range(1, pages_to_parse+1)]
+    books_id_lists = [parse_category_page(category_id, page) for page in range(1, pages_to_parse + 1)]
     books_id_list = [item for sublist in books_id_lists for item in sublist]
     for book_id in books_id_list:
         try:
@@ -100,13 +101,6 @@ def main() -> None:
             download_image(book_description['image'])
         except requests.exceptions.HTTPError:
             print(f"Книга - id_{book_id} отсутствует на сервере", file=sys.stderr)
-    """
-        try:
-            book_description = download_txt(category_id)
-            download_image(book_description['image'])
-        except requests.exceptions.HTTPError:
-            print(f"Книга - id_{book_id} отсутствует на сервере", file=sys.stderr)
-    """
 
 
 if __name__ == '__main__':
