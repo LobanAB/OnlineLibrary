@@ -8,10 +8,11 @@ import argparse
 import sys
 
 
-def download_txt(book_id: int, folder='books/') -> dict:
+def download_txt(book_id: int, skip_txt, folder) -> dict:
     """Функция для скачивания текстовых файлов.
     Args:
         book_id (str): id книги, которую хочется скачать.
+        skip_txt (bool): пропустить закачку текста книги.
         folder (str): Папка, куда сохранять.
     """
     url = f"https://tululu.org/txt.php"
@@ -20,13 +21,14 @@ def download_txt(book_id: int, folder='books/') -> dict:
     response.raise_for_status()
     check_for_redirect(response)
     book_description = parse_book_page(book_id)
-    filename = os.path.join(folder, f"{book_id}.{sanitize_filename(book_description['header'])}.txt")
-    with open(filename, 'w', encoding='utf-8') as file:
-        file.write(response.text)
+    if not skip_txt:
+        filename = os.path.join(folder, f"{book_id}.{sanitize_filename(book_description['header'])}.txt")
+        with open(filename, 'w', encoding='utf-8') as file:
+            file.write(response.text)
     return book_description
 
 
-def download_image(image: str, folder='images/') -> None:
+def download_image(image: str, folder) -> None:
     """Функция для скачивания текстовых файлов.
     Args:
         image (str): Cсылка на обложку книги, которую хочется скачать.
@@ -73,31 +75,50 @@ def parse_category_page(category_id=55, page_to_parse=1):
     return books_id_list
 
 
-def save_description_to_file(book_description):
-    with open("description.json", "a", encoding='utf8') as my_file:
+def save_description_to_file(book_description, json_path):
+    with open(json_path.joinpath('description.json'), 'a', encoding='utf8') as my_file:
         json.dump(book_description, my_file, ensure_ascii=False)
+
+
+def make_dir(target_path: Path):
+    Path(target_path).mkdir(parents=True, exist_ok=True)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description='Программа скачивает книги с библиотеки tululu.org ')
+        description='Программа скачивает книги с библиотеки tululu.org')
     parser.add_argument(
-        '-s', '--start_page', help='id книги с которой начать закачку ', type=int)
+        '-s', '--start_page', help='id книги с которой начать закачку', type=int, default=1)
     parser.add_argument(
-        '-e', '--end_page', help='id книги конечный ', type=int, default=702)
+        '-e', '--end_page', help='id книги конечный', type=int, default=702)
+    parser.add_argument(
+        '-df',
+        '--dest_folder',
+        help='путь к каталогу с результатами парсинга: картинкам, книгам, JSON.',
+        type=str, default=''
+    )
+    parser.add_argument(
+        '-si', '--skip_imgs', help='не скачивать картинки', type=bool, default=False)
+    parser.add_argument(
+        '-st', '--skip_txt', help='не скачивать книги', type=bool, default=False)
+    parser.add_argument(
+        '-jp', '--json_path', help='путь к *.json файлу с результатами', type=str, default='')
     args = parser.parse_args()
-    Path("books").mkdir(parents=True, exist_ok=True)
-    Path("images").mkdir(parents=True, exist_ok=True)
+    make_dir(Path.cwd() / args.dest_folder / 'books')
+    make_dir(Path.cwd() / args.dest_folder / 'images')
+    if args.json_path != '':
+        make_dir(Path.cwd() / args.dest_folder / args.json_path)
     category_id = 55
     books_id_lists = [parse_category_page(category_id, page) for page in range(args.start_page, args.end_page)]
     books_id_list = [item for sublist in books_id_lists for item in sublist]
     for book_id in books_id_list:
         try:
-            book_description = download_txt(book_id)
-            save_description_to_file(book_description)
-            download_image(book_description['image'])
+            book_description = download_txt(book_id, args.skip_txt, Path.cwd() / args.dest_folder / 'books')
+            save_description_to_file(book_description, Path.cwd() / args.dest_folder / args.json_path)
+            if not args.skip_imgs:
+                download_image(book_description['image'], Path.cwd() / args.dest_folder / 'images')
         except requests.exceptions.HTTPError:
-            print(f"Книга - id_{book_id} отсутствует на сервере", file=sys.stderr)
+            print(f'Книга - id_{book_id} отсутствует на сервере', file=sys.stderr)
 
 
 if __name__ == '__main__':
