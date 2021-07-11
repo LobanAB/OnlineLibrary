@@ -21,7 +21,7 @@ def download_txt(book_id: int, folder='books/') -> dict:
     check_for_redirect(response)
     book_description = parse_book_page(book_id)
     filename = os.path.join(folder, f"{book_id}.{sanitize_filename(book_description['header'])}.txt")
-    with open(filename, 'w') as file:
+    with open(filename, 'w', encoding='utf-8') as file:
         file.write(response.text)
     return book_description
 
@@ -79,20 +79,17 @@ def save_description_to_file(book_description):
 
 
 def main() -> None:
-    """
     parser = argparse.ArgumentParser(
         description='Программа скачивает книги с библиотеки tululu.org ')
     parser.add_argument(
-        'start_id', help='id книги с которой начать закачку ', type=int)
+        '-s', '--start_page', help='id книги с которой начать закачку ', type=int)
     parser.add_argument(
-        'end_id', help='id книги конечный ', type=int)
+        '-e', '--end_page', help='id книги конечный ', type=int, default=702)
     args = parser.parse_args()
-    """
     Path("books").mkdir(parents=True, exist_ok=True)
     Path("images").mkdir(parents=True, exist_ok=True)
     category_id = 55
-    pages_to_parse = 1
-    books_id_lists = [parse_category_page(category_id, page) for page in range(1, pages_to_parse + 1)]
+    books_id_lists = [parse_category_page(category_id, page) for page in range(args.start_page, args.end_page)]
     books_id_list = [item for sublist in books_id_lists for item in sublist]
     for book_id in books_id_list:
         try:
