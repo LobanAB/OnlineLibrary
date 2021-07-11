@@ -5,3 +5,6 @@
 bs4_tutorial.py
 description.json
 /images
+main.py
+*.json
+/*

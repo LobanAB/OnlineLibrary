@@ -15,14 +15,14 @@ def download_txt(book_id: int, skip_txt, folder) -> dict:
         skip_txt (bool): пропустить закачку текста книги.
         folder (str): Папка, куда сохранять.
     """
-    url = f"https://tululu.org/txt.php"
-    payload = {"id": book_id}
+    url = f'https://tululu.org/txt.php'
+    payload = {'id': book_id}
     response = requests.get(url, params=payload)
     response.raise_for_status()
     check_for_redirect(response)
     book_description = parse_book_page(book_id)
     if not skip_txt:
-        filename = os.path.join(folder, f"{book_id}.{sanitize_filename(book_description['header'])}.txt")
+        filename = os.path.join(folder, f'{book_id}.{sanitize_filename(book_description["header"])}.txt')
         with open(filename, 'w', encoding='utf-8') as file:
             file.write(response.text)
     return book_description
@@ -88,9 +88,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description='Программа скачивает книги с библиотеки tululu.org')
     parser.add_argument(
-        '-s', '--start_page', help='id книги с которой начать закачку', type=int, default=1)
+        '-s', '--start_page', help='id страницы с которой начать закачку', type=int, default=1)
     parser.add_argument(
-        '-e', '--end_page', help='id книги конечный', type=int, default=702)
+        '-e', '--end_page', help='id страницы до которой скачать', type=int, default=702)
     parser.add_argument(
         '-df',
         '--dest_folder',
