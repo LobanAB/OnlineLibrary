@@ -70,9 +70,9 @@ def parse_category_page(category_id=55, page_to_parse=1):
     response = requests.get(url)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
-    books_id_list = [book.a.extract().get('href')[2:-1] for book in
+    books_id = [book.a.extract().get('href')[2:-1] for book in
                      soup.select('#content .bookimage')]
-    return books_id_list
+    return books_id
 
 
 def save_description_to_file(book_description, json_path):
@@ -109,9 +109,9 @@ def main() -> None:
     if args.json_path != '':
         make_dir(Path.cwd() / args.dest_folder / args.json_path)
     category_id = 55
-    books_id_lists = [parse_category_page(category_id, page) for page in range(args.start_page, args.end_page)]
-    books_id_list = [item for sublist in books_id_lists for item in sublist]
-    for book_id in books_id_list:
+    books_ids = [parse_category_page(category_id, page) for page in range(args.start_page, args.end_page)]
+    books_id = [item for sublist in books_ids for item in sublist]
+    for book_id in books_id:
         try:
             book_description = download_txt(book_id, args.skip_txt, Path.cwd() / args.dest_folder / 'books')
             save_description_to_file(book_description, Path.cwd() / args.dest_folder / args.json_path)
