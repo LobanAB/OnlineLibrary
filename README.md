@@ -20,9 +20,9 @@
 
 `-df`, `--dest_folder`, путь к каталогу с результатами парсинга: картинкам, книгам, JSON., type=str, default=''
 
-`-si`, `--skip_imgs`, не скачивать картинки, type=bool, default=False
+`-si`, `--skip_imgs`, не скачивать картинки, по умолчанию False
 
-`-st`, `--skip_txt`, не скачивать книги, type=bool, default=False
+`-st`, `--skip_txt`, не скачивать книги, по умолчанию False
 
 `-jp`, `--json_path`, путь к *.json файлу с результатами, type=str, default=''
 

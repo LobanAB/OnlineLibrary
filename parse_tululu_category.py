@@ -98,9 +98,9 @@ def main() -> None:
         type=str, default=''
     )
     parser.add_argument(
-        '-si', '--skip_imgs', help='не скачивать картинки', type=bool, default=False)
+        '-si', '--skip_imgs', help='не скачивать картинки', action='store_true')
     parser.add_argument(
-        '-st', '--skip_txt', help='не скачивать книги', type=bool, default=False)
+        '-st', '--skip_txt', help='не скачивать книги', action='store_true')
     parser.add_argument(
         '-jp', '--json_path', help='путь к *.json файлу с результатами', type=str, default='')
     args = parser.parse_args()
