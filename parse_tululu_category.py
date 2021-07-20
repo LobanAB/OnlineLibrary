@@ -84,13 +84,24 @@ def make_dir(target_path: Path):
     Path(target_path).mkdir(parents=True, exist_ok=True)
 
 
+def category_last_page(category_id):
+    url = f'https://tululu.org/l{category_id}/'
+    response = requests.get(url)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, 'lxml')
+    end_page = int(soup.select('.npage')[-1].text)
+    return end_page
+
+
 def main() -> None:
+    category_id = 55
+    end_page = category_last_page(category_id) + 1
     parser = argparse.ArgumentParser(
         description='Программа скачивает книги с библиотеки tululu.org')
     parser.add_argument(
         '-s', '--start_page', help='id страницы с которой начать закачку', type=int, default=1)
     parser.add_argument(
-        '-e', '--end_page', help='id страницы до которой скачать', type=int, default=702)
+        '-e', '--end_page', help='id страницы до которой скачать', type=int, default=end_page)
     parser.add_argument(
         '-df',
         '--dest_folder',
@@ -108,7 +119,6 @@ def main() -> None:
     make_dir(Path.cwd() / args.dest_folder / 'images')
     if args.json_path != '':
         make_dir(Path.cwd() / args.dest_folder / args.json_path)
-    category_id = 55
     books_ids = [parse_category_page(category_id, page) for page in range(args.start_page, args.end_page)]
     books_id = [id for ids in books_ids for id in ids]
     for book_id in books_id:
