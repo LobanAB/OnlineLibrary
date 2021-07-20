@@ -80,10 +80,6 @@ def save_description_to_file(book_description, json_path):
         json.dump(book_description, my_file, ensure_ascii=False)
 
 
-def make_dir(target_path: Path):
-    Path(target_path).mkdir(parents=True, exist_ok=True)
-
-
 def category_last_page(category_id):
     url = f'https://tululu.org/l{category_id}/'
     response = requests.get(url)
@@ -115,10 +111,10 @@ def main() -> None:
     parser.add_argument(
         '-jp', '--json_path', help='путь к *.json файлу с результатами', type=str, default='')
     args = parser.parse_args()
-    make_dir(Path.cwd() / args.dest_folder / 'books')
-    make_dir(Path.cwd() / args.dest_folder / 'images')
+    Path(Path.cwd() / args.dest_folder / 'books').mkdir(parents=True, exist_ok=True)
+    Path(Path.cwd() / args.dest_folder / 'images').mkdir(parents=True, exist_ok=True)
     if args.json_path != '':
-        make_dir(Path.cwd() / args.dest_folder / args.json_path)
+        Path(Path.cwd() / args.dest_folder / args.json_path).mkdir(parents=True, exist_ok=True)
     books_ids = [parse_category_page(category_id, page) for page in range(args.start_page, args.end_page)]
     books_id = [id for ids in books_ids for id in ids]
     for book_id in books_id:
