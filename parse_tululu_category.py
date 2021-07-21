@@ -8,24 +8,23 @@ import argparse
 import sys
 
 
-def download_txt(book_id: int, skip_txt, folder) -> dict:
+def download_txt(book_id: int, book_header, skip_txt, folder):
     """Функция для скачивания текстовых файлов.
     Args:
         book_id (str): id книги, которую хочется скачать.
+        book_header (str): заголовок книги.
         skip_txt (bool): пропустить закачку текста книги.
-        folder (str): Папка, куда сохранять.
+        folder (str): Папка, куда сохранять текст.
     """
     url = f'https://tululu.org/txt.php'
     payload = {'id': book_id}
     response = requests.get(url, params=payload)
     response.raise_for_status()
     check_for_redirect(response)
-    book_description = parse_book_page(book_id)
     if not skip_txt:
-        filename = os.path.join(folder, f'{book_id}.{sanitize_filename(book_description["header"])}.txt')
+        filename = os.path.join(folder, f'{book_id}.{sanitize_filename(book_header)}.txt')
         with open(filename, 'w', encoding='utf-8') as file:
             file.write(response.text)
-    return book_description
 
 
 def download_image(image: str, folder) -> None:
@@ -119,7 +118,8 @@ def main() -> None:
     books_id = [id for ids in books_ids for id in ids]
     for book_id in books_id:
         try:
-            book_description = download_txt(book_id, args.skip_txt, Path.cwd() / args.dest_folder / 'books')
+            book_description = parse_book_page(book_id)
+            download_txt(book_id, book_description["header"], args.skip_txt, Path.cwd() / args.dest_folder / 'books')
             save_description_to_file(book_description, Path.cwd() / args.dest_folder / args.json_path)
             if not args.skip_imgs:
                 download_image(book_description['image'], Path.cwd() / args.dest_folder / 'images')
