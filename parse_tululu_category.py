@@ -30,16 +30,17 @@ def download_txt(book_id: int, book_header, skip_txt, folder):
             file.write(response.text)
 
 
-def download_image(image: str, folder) -> None:
+def download_image(image: str, folder, book_id) -> None:
     """Функция для скачивания текстовых файлов.
     Args:
         image (str): Cсылка на обложку книги, которую хочется скачать.
         folder (str): Папка, куда сохранять.
+        book_id (int): id книги.
     """
     url = f'https://tululu.org{image}'
     response = requests.get(url)
     response.raise_for_status()
-    image_name = os.path.split(urlparse(urllib.parse.unquote(image)).path)[-1]
+    image_name = f'{book_id}_' + os.path.split(urlparse(urllib.parse.unquote(image)).path)[-1]
     filename = os.path.join(folder, image_name)
     with open(filename, 'wb') as file:
         file.write(response.content)
@@ -123,7 +124,7 @@ def main() -> None:
             download_txt(book_id, book_description["header"], args.skip_txt, Path.cwd() / args.dest_folder / 'books')
             save_description_to_file(book_description, Path.cwd() / args.dest_folder / args.json_path)
             if not args.skip_imgs:
-                download_image(book_description['image'], Path.cwd() / args.dest_folder / 'images')
+                download_image(book_description['image'], Path.cwd() / args.dest_folder / 'images', book_id)
         except requests.exceptions.HTTPError:
             print(f'Книга - id_{book_id} отсутствует на сервере', file=sys.stderr)
 
