@@ -47,14 +47,12 @@ def parse_book_page(book_id: int) -> dict:
     response = requests.get(url)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
-    comments = [comment.get_text() for comment in soup.select('#content .black')]
     book_description = {
         'header': soup.select_one('h1').text.split('::')[0].strip(),
         'image': soup.select_one('.bookimage img')['src'],
-        'comments': comments,
+        'comments': [comment.get_text() for comment in soup.select('#content .black')],
         'author': soup.select_one('h1').text.split('::')[1].strip(),
-        'genre': soup.select_one('#content span.d_book')
-            .text.split(':')[1].strip().strip('.').split(', ')
+        'genre': [genre.text for genre in soup.select_one('#content span.d_book').select('a')]
     }
     return book_description
 
