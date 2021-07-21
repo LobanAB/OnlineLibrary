@@ -25,7 +25,8 @@ def download_txt(book_id: int, book_header, skip_txt, folder):
     response.raise_for_status()
     check_for_redirect(response)
     if not skip_txt:
-        filename = os.path.join(folder, f'{book_id}.{sanitize_filename(book_header)}.txt')
+        book_header = f'{book_id}.{sanitize_filename(book_header)}'
+        filename = os.path.join(folder, f'{book_header}.txt')
         with open(filename, 'w', encoding='utf-8') as file:
             file.write(response.text)
 
