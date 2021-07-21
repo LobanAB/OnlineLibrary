@@ -1,3 +1,5 @@
+import urllib
+
 import requests
 import json
 from pathlib import Path
@@ -6,6 +8,7 @@ import os
 from pathvalidate import sanitize_filename
 import argparse
 import sys
+from urllib.parse import urlparse
 
 
 def download_txt(book_id: int, book_header, skip_txt, folder):
@@ -36,7 +39,7 @@ def download_image(image: str, folder) -> None:
     url = f'https://tululu.org{image}'
     response = requests.get(url)
     response.raise_for_status()
-    image_name = image.split('/')[-1]
+    image_name = os.path.split(urlparse(urllib.parse.unquote(image)).path)[-1]
     filename = os.path.join(folder, image_name)
     with open(filename, 'wb') as file:
         file.write(response.content)
