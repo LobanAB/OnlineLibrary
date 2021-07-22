@@ -1,14 +1,14 @@
+import argparse
+import json
+import os
+import sys
 import urllib
+from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
-import json
-from pathlib import Path
 from bs4 import BeautifulSoup
-import os
 from pathvalidate import sanitize_filename
-import argparse
-import sys
-from urllib.parse import urlparse
 
 
 def download_txt(book_id: int, book_header, folder):
