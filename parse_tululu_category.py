@@ -52,11 +52,12 @@ def parse_book_page(book_id: int) -> dict:
     response = requests.get(url)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
+    header, author = map(str.strip, soup.select_one('h1').text.split('::'))
     book_description = {
-        'header': soup.select_one('h1').text.split('::')[0].strip(),
+        'header': header,
         'image': soup.select_one('.bookimage img')['src'],
         'comments': [comment.get_text() for comment in soup.select('#content .black')],
-        'author': soup.select_one('h1').text.split('::')[1].strip(),
+        'author': author,
         'genre': [genre.text for genre in soup.select_one('#content span.d_book').select('a')]
     }
     return book_description
@@ -78,7 +79,7 @@ def parse_category_page(category_id=55, page_to_parse=1):
 
 
 def save_description_to_file(book_description, json_path):
-    with open(json_path.joinpath('description.json'), 'a', encoding='utf8') as my_file:
+    with open(json_path.joinpath('description.json'), 'w', encoding='utf8') as my_file:
         json.dump(book_description, my_file, ensure_ascii=False)
 
 
