@@ -31,7 +31,7 @@ def download_txt(book_id: int, book_header, skip_txt, folder):
             file.write(response.text)
 
 
-def download_image(image: str, folder, book_id) -> None:
+def download_image(image: str, folder, book_id) -> str:
     """Функция для скачивания текстовых файлов.
     Args:
         image (str): Cсылка на обложку книги, которую хочется скачать.
@@ -45,6 +45,7 @@ def download_image(image: str, folder, book_id) -> None:
     filename = os.path.join(folder, image_name)
     with open(filename, 'wb') as file:
         file.write(response.content)
+    return filename
 
 
 def parse_book_page(book_id: int) -> dict:
@@ -124,9 +125,10 @@ def main() -> None:
         try:
             book_description = parse_book_page(book_id)
             download_txt(book_id, book_description["header"], args.skip_txt, Path.cwd() / args.dest_folder / 'books')
-            save_description_to_file(book_description, Path.cwd() / args.dest_folder / args.json_path)
             if not args.skip_imgs:
-                download_image(book_description['image'], Path.cwd() / args.dest_folder / 'images', book_id)
+                book_description['local_image'] = download_image(book_description['image'],
+                                                                 Path.cwd() / args.dest_folder / 'images', book_id)
+            save_description_to_file(book_description, Path.cwd() / args.dest_folder / args.json_path)
         except requests.exceptions.HTTPError:
             print(f'Книга - id_{book_id} отсутствует на сервере', file=sys.stderr)
 
