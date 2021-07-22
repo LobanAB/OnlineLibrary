@@ -11,12 +11,11 @@ import sys
 from urllib.parse import urlparse
 
 
-def download_txt(book_id: int, book_header, skip_txt, folder):
+def download_txt(book_id: int, book_header, folder):
     """Функция для скачивания текстовых файлов.
     Args:
         book_id (str): id книги, которую хочется скачать.
         book_header (str): заголовок книги.
-        skip_txt (bool): пропустить закачку текста книги.
         folder (str): Папка, куда сохранять текст.
     """
     url = f'https://tululu.org/txt.php'
@@ -24,11 +23,11 @@ def download_txt(book_id: int, book_header, skip_txt, folder):
     response = requests.get(url, params=payload)
     response.raise_for_status()
     check_for_redirect(response)
-    if not skip_txt:
-        book_header = f'{book_id}.{sanitize_filename(book_header)}'
-        filename = os.path.join(folder, f'{book_header}.txt')
-        with open(filename, 'w', encoding='utf-8') as file:
-            file.write(response.text)
+    book_header = f'{book_id}.{sanitize_filename(book_header)}'
+    filename = os.path.join(folder, f'{book_header}.txt')
+    with open(filename, 'w', encoding='utf-8') as file:
+        file.write(response.text)
+    return filename
 
 
 def download_image(image: str, folder, book_id) -> str:
@@ -121,16 +120,20 @@ def main() -> None:
         Path(Path.cwd() / args.dest_folder / args.json_path).mkdir(parents=True, exist_ok=True)
     books_ids = [parse_category_page(category_id, page) for page in range(args.start_page, args.end_page)]
     books_id = [id for ids in books_ids for id in ids]
+    books_json = []
     for book_id in books_id:
         try:
             book_description = parse_book_page(book_id)
-            download_txt(book_id, book_description["header"], args.skip_txt, Path.cwd() / args.dest_folder / 'books')
+            if not args.skip_txt:
+                book_description['local_txt'] = download_txt(book_id, book_description["header"],
+                                                             Path.cwd() / args.dest_folder / 'books')
             if not args.skip_imgs:
                 book_description['local_image'] = download_image(book_description['image'],
                                                                  Path.cwd() / args.dest_folder / 'images', book_id)
-            save_description_to_file(book_description, Path.cwd() / args.dest_folder / args.json_path)
+            books_json.append(book_description)
         except requests.exceptions.HTTPError:
             print(f'Книга - id_{book_id} отсутствует на сервере', file=sys.stderr)
+    save_description_to_file(books_json, Path.cwd() / args.dest_folder / args.json_path)
 
 
 if __name__ == '__main__':
