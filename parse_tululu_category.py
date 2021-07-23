@@ -2,9 +2,7 @@ import argparse
 import json
 import os
 import sys
-import urllib
 from pathlib import Path
-from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
