@@ -40,7 +40,7 @@ def download_image(image: str, folder, book_id) -> str:
     url = f'https://tululu.org{image}'
     response = requests.get(url)
     response.raise_for_status()
-    image_name = f'{book_id}_' + os.path.split(urlparse(urllib.parse.unquote(image)).path)[-1]
+    image_name = f'{book_id}_{os.path.split(urlparse(urllib.parse.unquote(image)).path)[-1]}'
     filename = os.path.join(folder, image_name)
     with open(filename, 'wb') as file:
         file.write(response.content)
