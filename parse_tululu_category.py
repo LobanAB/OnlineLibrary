@@ -83,7 +83,7 @@ def save_description_to_file(book_description, json_path):
         json.dump(book_description, my_file, ensure_ascii=False)
 
 
-def category_last_page(category_id):
+def get_category_last_page(category_id):
     url = f'https://tululu.org/l{category_id}/'
     response = requests.get(url)
     response.raise_for_status()
@@ -94,7 +94,7 @@ def category_last_page(category_id):
 
 def main() -> None:
     category_id = 55
-    end_page = category_last_page(category_id) + 1
+    end_page = get_category_last_page(category_id) + 1
     parser = argparse.ArgumentParser(
         description='Программа скачивает книги с библиотеки tululu.org')
     parser.add_argument(
