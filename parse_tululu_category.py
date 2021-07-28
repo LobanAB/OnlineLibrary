@@ -42,7 +42,7 @@ def download_image(image: str, folder, book_id) -> str:
     filename = os.path.join(folder, image_name)
     with open(filename, 'wb') as file:
         file.write(response.content)
-    return filename
+    return image_name
 
 
 def parse_book_page(book_id: int) -> dict:
