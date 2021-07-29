@@ -25,7 +25,7 @@ def download_txt(book_id: int, book_header, folder):
     filename = os.path.join(folder, f'{book_header}.txt')
     with open(filename, 'w', encoding='utf-8') as file:
         file.write(response.text)
-    return filename
+    return f'{book_header}.txt'
 
 
 def download_image(image: str, folder, book_id) -> str:
