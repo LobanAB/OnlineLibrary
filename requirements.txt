@@ -4,3 +4,4 @@ requests==2.25.1
 lxml==4.6.3
 Jinja2==3.0.1
 livereload==2.6.3
+more-itertools==8.8.0
