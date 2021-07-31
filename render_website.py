@@ -1,8 +1,10 @@
 import json
+import os
+from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from livereload import Server
-from more_itertools import chunked
+from more_itertools import chunked, sliced
 
 
 def rebuild():
@@ -14,12 +16,21 @@ def rebuild():
         autoescape=select_autoescape(['html', 'xml'])
     )
     template = env.get_template('template.html')
-    rendered_page = template.render(
-        books=list(chunked(books, 2)),
-    )
-    with open('index.html', 'w', encoding="utf8") as file:
-        file.write(rendered_page)
+    pages_dir = Path(Path.cwd() / 'pages')
+    books_per_page = 10
+    os.makedirs(pages_dir, exist_ok=True)
+    render_pages(template, books, pages_dir, books_per_page)
     print("Site rebuilt")
+
+
+def render_pages(template, books, pages_dir, books_per_page=10):
+    for page, chunk in enumerate(list(sliced(books, books_per_page)), 1):
+        rendered_page = template.render(
+            books=list(chunked(chunk, 2)),
+        )
+        filename = os.path.join(pages_dir, f'index{page}.html')
+        with open(filename, 'w', encoding="utf8") as file:
+            file.write(rendered_page)
 
 
 def main():
