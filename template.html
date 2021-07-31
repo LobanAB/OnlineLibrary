@@ -12,6 +12,15 @@
 </head>
 <body>
 <div class="container">
+  <nav aria-label="Page navigation example">
+    <ul class="pagination">
+      <li class="page-item {% if current_page == 1 %} disabled {% endif %}"><a class="page-link" href="../pages/index{{ current_page|e|int - 1}}.html">Previous</a></li>
+      {% for page in range(1, pages + 1) %}
+      <li class="page-item {% if page == current_page %} active {% endif %}"><a class="page-link" href="../pages/index{{ page|e|int }}.html">{{ page|e }}</a></li>
+      {% endfor %}
+      <li class="page-item {% if current_page == pages %} disabled {% endif %}"><a class="page-link" href="../pages/index{{ current_page|e|int + 1}}.html">Next</a></li>
+    </ul>
+  </nav>
   <div class="row">
     {% for line in books %}
     {% for book in line %}

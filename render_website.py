@@ -1,4 +1,5 @@
 import json
+import math
 import os
 from pathlib import Path
 
@@ -24,9 +25,12 @@ def rebuild():
 
 
 def render_pages(template, books, pages_dir, books_per_page=10):
+    pages = math.ceil(len(books) / books_per_page)
     for page, chunk in enumerate(list(sliced(books, books_per_page)), 1):
         rendered_page = template.render(
             books=list(chunked(chunk, 2)),
+            pages=pages,
+            current_page=page,
         )
         filename = os.path.join(pages_dir, f'index{page}.html')
         with open(filename, 'w', encoding="utf8") as file:
@@ -37,7 +41,7 @@ def main():
     rebuild()
     server = Server()
     server.watch('template.html', rebuild)
-    server.serve(root='.')
+    server.serve(root='.', default_filename='pages/index1.html')
 
 
 if __name__ == '__main__':
