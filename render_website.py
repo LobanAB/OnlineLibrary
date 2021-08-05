@@ -32,8 +32,8 @@ def render_pages(template, books, pages_dir, books_per_page=10):
             pages=pages,
             current_page=page,
         )
-        filename = os.path.join(pages_dir, f'index{page}.html')
-        with open(filename, 'w', encoding="utf8") as file:
+        filepath = os.path.join(pages_dir, f'index{page}.html')
+        with open(filepath, 'w', encoding="utf8") as file:
             file.write(rendered_page)
 
 
