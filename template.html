@@ -38,7 +38,7 @@
       <div class="card mb-3" style="max-width: 540px;">
         <div class="row no-gutters">
           <div class="col-md-4">
-            <img src="../static/images/{{ book.local_image|e }}" class="card-img" alt="{{ book.author|e }} - {{ book.header|e }}">
+            <img src="../images/{{ book.local_image|e }}" class="card-img" alt="{{ book.author|e }} - {{ book.header|e }}">
           </div>
           <div class="col-md-8">
             <div class="card-body">
@@ -47,7 +47,7 @@
               {% for genre in book.genre %}
               <h6>{{ genre|e }} <span class="badge badge-secondary"></span></h6>
               {% endfor %}
-              <p><a href="../static/books/{{ book.local_txt|e|urlencode }}" target="_blank" rel="noopener noreferrer">Читать</a></p>
+              <p><a href="../books/{{ book.local_txt|e|urlencode }}" target="_blank" rel="noopener noreferrer">Читать</a></p>
             </div>
           </div>
         </div>
